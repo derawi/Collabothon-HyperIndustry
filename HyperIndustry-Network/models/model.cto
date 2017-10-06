@@ -1,0 +1,74 @@
+/**
+ * Model for the prototype Network
+ * Containing one Supplier, one SME
+ * two assets: Commodity, which represents a real traded good
+ *			   Invoice, which represents a payment to be processed in real
+ * In the future, this could be integrated to a payment Blockchain
+ */
+
+namespace org.acme.hyperindustry
+
+// ========= PARTICIPANTS ============
+
+abstract participant Company identified by companyID {
+  	o String companyID
+}
+participant Supplier extends Company {
+}
+
+participant SME extends Company {
+}
+
+//not use in the prototype 
+participant FreightForwarder extends Company {
+}
+
+
+participant Bank extends Company {
+  	o String name default="Comdirect"  
+}
+
+// ======== ASSETS =========
+asset Commodity identified by rfid {
+	o String rfid
+    o String type default = "CarbonSheet"
+    o Integer price
+  	o Boolean accepted default=false
+  	--> Company owner 
+    --> Company producer optional
+    --> SME receiver optional
+}
+
+asset Invoice identified by invoiceId{
+	o String invoiceId
+    o Integer price optional
+    --> SME debit optional 
+    --> Supplier credit optional
+
+
+}
+
+  
+// ======== TRANSACTIONS =========
+// changes the owner of the commodity
+transaction ShipCommodity {
+  --> Commodity commodity
+  --> Company newOwner
+}
+
+transaction Test{
+  	o String invoiceId  	
+}
+ 
+// accepts the shipment and triggers a transaction for releasing the funds
+transaction AcceptShipment {
+  --> Commodity commodity
+  
+}
+  
+event AcceptShipmentEvent {
+  --> Commodity commodity
+  --> Company producer optional
+  --> SME receiver optional
+  o Integer price optional
+}
